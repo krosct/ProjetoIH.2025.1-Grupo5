@@ -149,5 +149,49 @@ module cpu (
     ShiftLeft16 shiftleft16(.di(sign_extend_out), .do(shiftleft16_out));
     ShiftLeft2bottom shiftleft2bottom(.di(sign_extend_out), .do(shiftleft2bottom_out));
     ShiftLeft2top shiftleft2top(.di1(rs), .di2(rt), .di3(immediate), .do(shiftleft2bottom_out));
+    DivMult divmult(.divmult_zeroexception); // ! completar apos fazer o modulo divmult
+
+    control_unit control(
+        // inputs
+        .clk(clk),
+        .reset(reset),
+        .OverflowException(alu_overflowexception),
+        .ng(), // ?
+        .Zero(alu_zero),
+        .ZeroException(divmult_zeroexception),
+        .eq(nouse),
+        .gt(nouse),
+        .lt(nouse),
+        .opcode(opcode),
+        .funct(funct),
+        // outputs
+        .PCWrite(ctrl_pcwrite),
+        .EPCWrite(ctrl_epcwrite),
+        .ALUOp(ctrl_aluop),
+        .MemRead(ctrl_memread),
+        .MemWrite(ctrl_memwrite),
+        .IRWrite(ctrl_IRWrite),
+        .RegWrite(ctrl_regwrite),
+        .ControlA(ctrl_controla),
+        .ControlB(ctrl_controlb),
+        .ALUOut(ctrl_aluout),
+        .DivMult(ctrl_divmult),
+        .Hi(ctrl_hi),
+        .Lo(ctrl_lo),
+        .PCWriteCondBEQ(ctrl_PCWriteCondBEQ),
+        .PCWriteCondBNE(ctrl_pcwritecondbne),
+        .IorD(ctrl_iord),
+        .ContOrExcep(ctrl_contorexcep),
+        .RegDst(ctrl_regdst),
+        .ALUSrcA(ctrl_alusrca),
+        .ALUSrcB(ctrl_alusrcb),
+        .PCSource(ctrl_pcsource),
+        .ShamtSource(ctrl_shamtsource),
+        .MemToReg(ctrl_memtoreg),
+        .ShiftFuncSrc(ctrl_shiftfuncsrc),
+        .SelectByteSrc(ctrl_selectbytesrc),
+        .SelectByte(ctrl_selectbyte),
+        .rst_out // ! completar aqui!
+    );
     
 endmodule
