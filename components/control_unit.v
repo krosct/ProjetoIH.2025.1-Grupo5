@@ -28,6 +28,8 @@ module control_unit (
     output reg Lo,
     output reg PCWriteCondBEQ,
     output reg PCWriteCondBNE,
+    output reg MDR1,
+    output reg MDR2,
     // Mux
     output reg [2:0] IorD,
     output reg ContOrExcep,
@@ -411,9 +413,9 @@ module control_unit (
                         MemRead = 1'b0; ///
                         MemWrite = 1'b0; ///
                         IRWrite = 1'b0;
-                        RegWrite = 1'b0;
-                        ControlA = 1'b1;
-                        ControlB = 1'b1;
+                        RegWrite = 1'b1;
+                        ControlA = 1'b0; ///
+                        ControlB = 1'b0; ///
                         ALUOut = 1'b1; ///
                         DivMult = 1'b0;
                         Hi = 1'b0;
@@ -447,8 +449,8 @@ module control_unit (
                         MemWrite = 1'b0;
                         IRWrite = 1'b0;
                         RegWrite = 1'b1; ///
-                        ControlA = 1'b1;
-                        ControlB = 1'b1;
+                        ControlA = 1'b0; ///
+                        ControlB = 1'b0; ///
                         ALUOut = 1'b0;  ///
                         DivMult = 1'b0;
                         Hi = 1'b0;
@@ -473,7 +475,6 @@ module control_unit (
                         COUNTER = COUNTER + 1;
                     end
                     else begin
-                                            // Settings all signals to 0
                         STATE = ST_READ_F_MEMORY;
                         PCWrite = 1'b0;
                         EPCWrite = 1'b0;
@@ -508,6 +509,400 @@ module control_unit (
                         COUNTER = 5'd0;
                     end
                 end
+                ST_ADDI: begin
+                    if (COUNTER == 5'd0) begin
+                        // Settings all signals to 0
+                        STATE = ST_ADDI;
+                        PCWrite = 1'b0;
+                        EPCWrite = 1'b0;
+                        ALUOp = 3'b0;
+                        MemRead = 1'b0; ///
+                        MemWrite = 1'b0; ///
+                        IRWrite = 1'b0;
+                        RegWrite = 1'b1;
+                        ControlA = 1'b0; ///
+                        ControlB = 1'b0; ///
+                        ALUOut = 1'b1; ///
+                        DivMult = 1'b0;
+                        Hi = 1'b0;
+                        Lo = 1'b0;
+                        PCWriteCondBEQ = 1'b0;
+                        PCWriteCondBNE = 1'b0;
+                        // Mux
+                        IorD = 3'b0;
+                        ContOrExcep = 1'b0;
+                        RegDst = 2'b00; ///
+                        ALUSrcA = 2'b10; ///
+                        ALUSrcB = 3'b000; ///
+                        PCSource = 2'b0;
+                        ShamtSource = 1'b0;
+                        MemToReg = 3'b0;
+                        ShiftFuncSrc = 2'b0;
+                        SelectByteSrc = 2'b0;
+                        SelectByte = 1'b0;
+                        // Controller for reset
+                        rst_out = 1'b0;
+                        // Setting counter for next operation
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd1) begin
+                        // Settings all signals to 0
+                        STATE = ST_ADDI;
+                        PCWrite = 1'b0;
+                        EPCWrite = 1'b0;
+                        ALUOp = 3'b0;
+                        MemRead = 1'b0;
+                        MemWrite = 1'b0;
+                        IRWrite = 1'b0;
+                        RegWrite = 1'b1; ///
+                        ControlA = 1'b0; ///
+                        ControlB = 1'b0; ///
+                        ALUOut = 1'b0;  ///
+                        DivMult = 1'b0;
+                        Hi = 1'b0;
+                        Lo = 1'b0;
+                        PCWriteCondBEQ = 1'b0;
+                        PCWriteCondBNE = 1'b0;
+                        // Mux
+                        IorD = 3'b0;
+                        ContOrExcep = 1'b0;
+                        RegDst = 2'b1;
+                        ALUSrcA = 2'b10;
+                        ALUSrcB = 3'b000;
+                        PCSource = 2'b0;
+                        ShamtSource = 1'b0;
+                        MemToReg = 3'b110; ///
+                        ShiftFuncSrc = 2'b0; ///
+                        SelectByteSrc = 2'b10;
+                        SelectByte = 1'b0; ///
+                        // Controller for reset
+                        rst_out = 1'b0;
+                        // Setting counter for next operation
+                        COUNTER = COUNTER + 1;
+                    end
+                    else begin
+                        STATE = ST_READ_F_MEMORY;
+                        PCWrite = 1'b0;
+                        EPCWrite = 1'b0;
+                        ALUOp = 3'b0;
+                        MemRead = 1'b0;
+                        MemWrite = 1'b0;
+                        IRWrite = 1'b0;
+                        RegWrite = 1'b1; ///
+                        ControlA = 1'b1;
+                        ControlB = 1'b1;
+                        ALUOut = 1'b0;  ///
+                        DivMult = 1'b0;
+                        Hi = 1'b0;
+                        Lo = 1'b0;
+                        PCWriteCondBEQ = 1'b0;
+                        PCWriteCondBNE = 1'b0;
+                        // Mux
+                        IorD = 3'b0;
+                        ContOrExcep = 1'b0;
+                        RegDst = 2'b1;
+                        ALUSrcA = 2'b10;
+                        ALUSrcB = 3'b000;
+                        PCSource = 2'b0;
+                        ShamtSource = 1'b0;
+                        MemToReg = 3'b110; ///
+                        ShiftFuncSrc = 2'b0; ///
+                        SelectByteSrc = 2'b10;
+                        SelectByte = 1'b0; ///
+                        // Controller for reset
+                        rst_out = 1'b0;
+                        // Setting counter for initial state
+                        COUNTER = 5'd0;
+                    end
+                end
+                ST_MFLO: begin
+                    if (COUNTER == 5'd0) begin
+                        STATE = ST_MFLO;
+                        // Settings all signals
+                        PCWrite = 1'b0;
+                        EPCWrite = 1'b0;
+                        ALUOp = 3'b0;
+                        MemRead = 1'b0;
+                        MemWrite = 1'b0;
+                        IRWrite = 1'b0;
+                        RegWrite = 1'b1;
+                        ControlA = 1'b0;
+                        ControlB = 1'b0;
+                        ALUOut = 1'b0;
+                        DivMult = 1'b0;
+                        Hi = 1'b0;
+                        Lo = 1'b0;
+                        PCWriteCondBEQ = 1'b0;
+                        PCWriteCondBNE = 1'b0;
+                        // Mux
+                        IorD = 3'b0;
+                        ContOrExcep = 1'b0;
+                        RegDst = 2'b0;
+                        ALUSrcA = 2'b0;
+                        ALUSrcB = 3'b0;
+                        PCSource = 2'b0;
+                        ShamtSource = 1'b0;
+                        MemToReg = 3'b011; ///
+                        ShiftFuncSrc = 2'b0;
+                        SelectByteSrc = 2'b10; ///
+                        SelectByte = 1'b0; ///
+                        // Controller for reset
+                        rst_out = 1'b1; /// Comentário indicando o que foi alterado
+                        // Setting counter for next operation
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd1) begin
+                        STATE = ST_READ_F_MEMORY;
+                        // Settings all signals
+                        PCWrite = 1'b0;
+                        EPCWrite = 1'b0;
+                        ALUOp = 3'b0;
+                        MemRead = 1'b0;
+                        MemWrite = 1'b0;
+                        IRWrite = 1'b0;
+                        RegWrite = 1'b1;
+                        ControlA = 1'b0;
+                        ControlB = 1'b0;
+                        ALUOut = 1'b0;
+                        DivMult = 1'b0;
+                        Hi = 1'b0;
+                        Lo = 1'b0;
+                        PCWriteCondBEQ = 1'b0;
+                        PCWriteCondBNE = 1'b0;
+                        // Mux
+                        IorD = 3'b0;
+                        ContOrExcep = 1'b0;
+                        RegDst = 2'b0;
+                        ALUSrcA = 2'b0;
+                        ALUSrcB = 3'b0;
+                        PCSource = 2'b0;
+                        ShamtSource = 1'b0;
+                        MemToReg = 3'b011; ///
+                        ShiftFuncSrc = 2'b0;
+                        SelectByteSrc = 2'b10; ///
+                        SelectByte = 1'b0; ///
+                        // Controller for reset
+                        rst_out = 1'b1; /// Comentário indicando o que foi alterado
+                        // Setting counter for next operation
+                        COUNTER = 5'd0;
+                    end
+                end
+                ST_MFHI: begin
+                    if (COUNTER == 5'd0) begin
+                        STATE = ST_MFHI;
+                        // Settings all signals
+                        PCWrite = 1'b0;
+                        EPCWrite = 1'b0;
+                        ALUOp = 3'b0;
+                        MemRead = 1'b0;
+                        MemWrite = 1'b0;
+                        IRWrite = 1'b0;
+                        RegWrite = 1'b1;
+                        ControlA = 1'b0;
+                        ControlB = 1'b0;
+                        ALUOut = 1'b0;
+                        DivMult = 1'b0;
+                        Hi = 1'b0;
+                        Lo = 1'b0;
+                        PCWriteCondBEQ = 1'b0;
+                        PCWriteCondBNE = 1'b0;
+                        // Mux
+                        IorD = 3'b0;
+                        ContOrExcep = 1'b0;
+                        RegDst = 2'b0;
+                        ALUSrcA = 2'b0;
+                        ALUSrcB = 3'b0;
+                        PCSource = 2'b0;
+                        ShamtSource = 1'b0;
+                        MemToReg = 3'b011; ///
+                        ShiftFuncSrc = 2'b0;
+                        SelectByteSrc = 2'b10; ///
+                        SelectByte = 1'b0; ///
+                        // Controller for reset
+                        rst_out = 1'b1; /// Comentário indicando o que foi alterado
+                        // Setting counter for next operation
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd1) begin
+                        STATE = ST_READ_F_MEMORY;
+                        // Settings all signals
+                        PCWrite = 1'b0;
+                        EPCWrite = 1'b0;
+                        ALUOp = 3'b0;
+                        MemRead = 1'b0;
+                        MemWrite = 1'b0;
+                        IRWrite = 1'b0;
+                        RegWrite = 1'b1;
+                        ControlA = 1'b0;
+                        ControlB = 1'b0;
+                        ALUOut = 1'b0;
+                        DivMult = 1'b0;
+                        Hi = 1'b0;
+                        Lo = 1'b0;
+                        PCWriteCondBEQ = 1'b0;
+                        PCWriteCondBNE = 1'b0;
+                        // Mux
+                        IorD = 3'b0;
+                        ContOrExcep = 1'b0;
+                        RegDst = 2'b0;
+                        ALUSrcA = 2'b0;
+                        ALUSrcB = 3'b0;
+                        PCSource = 2'b0;
+                        ShamtSource = 1'b0;
+                        MemToReg = 3'b011; ///
+                        ShiftFuncSrc = 2'b0;
+                        SelectByteSrc = 2'b10; ///
+                        SelectByte = 1'b0; ///
+                        // Controller for reset
+                        rst_out = 1'b1; /// Comentário indicando o que foi alterado
+                        // Setting counter for next operation
+                        COUNTER = 5'd0;
+                    end
+                end
+                ST_LB: begin
+                    if (COUNTER == 5'd0) begin
+                        STATE = ST_LB;
+                        // Settings all signals
+                        PCWrite = 1'b0;
+                        EPCWrite = 1'b0;
+                        ALUOp = 3'b0;
+                        MemRead = 1'b0;
+                        MemWrite = 1'b0;
+                        IRWrite = 1'b0;
+                        RegWrite = 1'b0;
+                        ControlA = 1'b0;
+                        ControlB = 1'b0;
+                        ALUOut = 1'b1; ///
+                        DivMult = 1'b0;
+                        Hi = 1'b0;
+                        Lo = 1'b0;
+                        PCWriteCondBEQ = 1'b0;
+                        PCWriteCondBNE = 1'b0;
+                        // Mux
+                        IorD = 3'b0;
+                        ContOrExcep = 1'b0;
+                        RegDst = 2'b0;
+                        ALUSrcA = 2'b10; ///
+                        ALUSrcB = 3'b010; ///
+                        PCSource = 2'b0;
+                        ShamtSource = 1'b0;
+                        MemToReg = 3'b0;
+                        ShiftFuncSrc = 2'b0;
+                        SelectByteSrc = 2'b0; ///
+                        SelectByte = 1'b1; ///
+                        // Controller for reset
+                        rst_out = 1'b0;
+                        // Setting counter for next operation
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd1) begin
+                        STATE = ST_LB;
+                        // Settings all signals
+                        PCWrite = 1'b0;
+                        EPCWrite = 1'b0;
+                        ALUOp = 3'b0;
+                        MemRead = 1'b1; ///
+                        MemWrite = 1'b0;
+                        IRWrite = 1'b0;
+                        RegWrite = 1'b0;
+                        ControlA = 1'b0;
+                        ControlB = 1'b0;
+                        ALUOut = 1'b0; ///
+                        DivMult = 1'b0;
+                        Hi = 1'b0;
+                        Lo = 1'b0;
+                        PCWriteCondBEQ = 1'b0;
+                        PCWriteCondBNE = 1'b0;
+                        // Mux
+                        IorD = 3'b001; ///
+                        ContOrExcep = 1'b0;
+                        RegDst = 2'b0;
+                        ALUSrcA = 2'b10; ///
+                        ALUSrcB = 3'b010; ///
+                        PCSource = 2'b0;
+                        ShamtSource = 1'b0;
+                        MemToReg = 3'b0;
+                        ShiftFuncSrc = 2'b0;
+                        SelectByteSrc = 2'b0; ///
+                        SelectByte = 1'b1; ///
+                        // Controller for reset
+                        rst_out = 1'b0;
+                        // Setting counter for next operation
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd2) begin
+                        STATE = ST_LB;
+                        // Settings all signals
+                        PCWrite = 1'b0;
+                        EPCWrite = 1'b0;
+                        ALUOp = 3'b0;
+                        MemRead = 1'b1; ///
+                        MemWrite = 1'b0;
+                        IRWrite = 1'b0;
+                        RegWrite = 1'b0;
+                        ControlA = 1'b0;
+                        ControlB = 1'b0;
+                        ALUOut = 1'b0; ///
+                        DivMult = 1'b0;
+                        Hi = 1'b0;
+                        Lo = 1'b0;
+                        PCWriteCondBEQ = 1'b0;
+                        PCWriteCondBNE = 1'b0;
+                        // Mux
+                        IorD = 3'b001; ///
+                        ContOrExcep = 1'b0;
+                        RegDst = 2'b0;
+                        ALUSrcA = 2'b10; ///
+                        ALUSrcB = 3'b010; ///
+                        PCSource = 2'b0;
+                        ShamtSource = 1'b0;
+                        MemToReg = 3'b0;
+                        ShiftFuncSrc = 2'b0;
+                        SelectByteSrc = 2'b0; ///
+                        SelectByte = 1'b1; ///
+                        // Controller for reset
+                        rst_out = 1'b0;
+                        // Setting counter for next operation
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd3) begin
+                        STATE = ST_LB;
+                        // Settings all signals
+                        PCWrite = 1'b0;
+                        EPCWrite = 1'b0;
+                        ALUOp = 3'b0;
+                        MemRead = 1'b0; ///
+                        MemWrite = 1'b0;
+                        IRWrite = 1'b0;
+                        RegWrite = 1'b1;
+                        ControlA = 1'b0;
+                        ControlB = 1'b0;
+                        ALUOut = 1'b0;
+                        DivMult = 1'b0;
+                        Hi = 1'b0;
+                        Lo = 1'b0;
+                        PCWriteCondBEQ = 1'b0;
+                        PCWriteCondBNE = 1'b0;
+                        MDR1 = 1'b1; ///
+                        // Mux
+                        IorD = 3'b001;
+                        ContOrExcep = 1'b0;
+                        RegDst = 2'b0;
+                        ALUSrcA = 2'b10;
+                        ALUSrcB = 3'b010;
+                        PCSource = 2'b0;
+                        ShamtSource = 1'b0;
+                        MemToReg = 3'b0; ///
+                        ShiftFuncSrc = 2'b0;
+                        SelectByteSrc = 2'b10; ///
+                        SelectByte = 1'b0; ///
+                        // Controller for reset
+                        rst_out = 1'b0;
+                        // Setting counter for next operation
+                        COUNTER = 5'd0;
+                    end
+                end
+                
             endcase
         end
     end
