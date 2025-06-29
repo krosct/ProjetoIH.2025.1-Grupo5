@@ -1,4 +1,4 @@
-module shiftleft16 (
+module ShiftLeft16 (
      input  wire [31:0] di,
      output wire [31:0] do
 );

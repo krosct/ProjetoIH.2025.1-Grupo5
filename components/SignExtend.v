@@ -1,4 +1,4 @@
-module sign_extend (
+module SignExtend (
     input  wire [15:0] di,
     output wire [31:0] do
 );

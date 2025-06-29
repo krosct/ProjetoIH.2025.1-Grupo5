@@ -1,4 +1,4 @@
-module shiftleft2bottom (
+module ShiftLeft2bottom (
      input  wire [31:0] di,
      output wire [31:0] do
 );

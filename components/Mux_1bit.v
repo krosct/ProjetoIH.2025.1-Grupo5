@@ -1,4 +1,4 @@
-module mux_1bit(
+module Mux_1bit(
     input wire ctrl,
     input wire [31:0] o0,
     input wire [31:0] o1,

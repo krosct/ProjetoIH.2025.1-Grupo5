@@ -1,4 +1,4 @@
-module mux_muxpcsource(
+module Mux_muxpcsource(
     input wire [1:0] ctrl,
     input wire [31:0] o0,
     input wire [31:0] o1,
