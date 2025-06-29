@@ -5,6 +5,6 @@ module shiftleft2top (
      output wire [28:0] do
 );
 
-    assign do = di << 2;
+    assign do = {di1, di2, di3} << 2;
 
 endmodule

@@ -43,7 +43,7 @@ module control_unit (
     output reg [1:0] SelectByteSrc,
     output reg SelectByte,
     // Controller for reset
-    output reg rst_out
+    output reg reset
 );
 
     // Variables
@@ -108,7 +108,7 @@ module control_unit (
     parameter J = 6'h0x2;
     parameter JAL = 6'h0x3;
     initial begin
-        rst_out = 1'b1;
+        reset = 1'b1;
     end
 
     always @(posedge clk) begin
@@ -145,7 +145,7 @@ module control_unit (
                 SelectByteSrc = 2'b0;
                 SelectByte = 1'b0;
                 // Controller for reset
-                rst_out = 1'b1; /// Comentário indicando o que foi alterado
+                reset = 1'b1; /// Comentário indicando o que foi alterado
                 // Setting counter for next operation
                 COUNTER = 5'd0;
             end
@@ -180,7 +180,7 @@ module control_unit (
                 SelectByteSrc = 2'b0;
                 SelectByte = 1'b0;
                 // Controller for reset
-                rst_out = 1'b0; ///
+                reset = 1'b0; ///
                 // Setting counter for next operation
                 COUNTER = 5'd0;
             end
@@ -219,7 +219,7 @@ module control_unit (
                         SelectByteSrc = 2'b0;
                         SelectByte = 1'b0;
                         // Controller for reset
-                        rst_out = 1'b0; ///
+                        reset = 1'b0; ///
                         // Setting counter for next operation
                         COUNTER = COUNTER + 1;
                     end
@@ -254,7 +254,7 @@ module control_unit (
                         SelectByteSrc = 2'b0;
                         SelectByte = 1'b0;
                         // Controller for reset
-                        rst_out = 1'b0; ///
+                        reset = 1'b0; ///
                         // Setting counter for next operation
                         COUNTER = COUNTER + 1;
                     end
@@ -289,7 +289,7 @@ module control_unit (
                         SelectByteSrc = 2'b0;
                         SelectByte = 1'b0;
                         // Controller for reset
-                        rst_out = 1'b0; ///
+                        reset = 1'b0; ///
                         // Setting counter for next operation
                         COUNTER = COUNTER + 1;
                     end
@@ -398,7 +398,7 @@ module control_unit (
                         SelectByteSrc = 2'b0;
                         SelectByte = 1'b0;
                         // Controller for reset
-                        rst_out = 1'b0; /// Comentário indicando o que foi alterado
+                        reset = 1'b0; /// Comentário indicando o que foi alterado
                         // Setting counter for next operation
                         COUNTER = 5'd0;  // We'll start as from 0 on non-commom states
                     end
@@ -435,7 +435,7 @@ module control_unit (
                         SelectByteSrc = 2'b0;
                         SelectByte = 1'b0;
                         // Controller for reset
-                        rst_out = 1'b0;
+                        reset = 1'b0;
                         // Setting counter for next operation
                         COUNTER = COUNTER + 1;
                     end
@@ -470,7 +470,7 @@ module control_unit (
                         SelectByteSrc = 2'b10;
                         SelectByte = 1'b0; ///
                         // Controller for reset
-                        rst_out = 1'b0;
+                        reset = 1'b0;
                         // Setting counter for next operation
                         COUNTER = COUNTER + 1;
                     end
@@ -504,7 +504,7 @@ module control_unit (
                         SelectByteSrc = 2'b10;
                         SelectByte = 1'b0; ///
                         // Controller for reset
-                        rst_out = 1'b0;
+                        reset = 1'b0;
                         // Setting counter for initial state
                         COUNTER = 5'd0;
                     end
@@ -541,7 +541,7 @@ module control_unit (
                         SelectByteSrc = 2'b0;
                         SelectByte = 1'b0;
                         // Controller for reset
-                        rst_out = 1'b0;
+                        reset = 1'b0;
                         // Setting counter for next operation
                         COUNTER = COUNTER + 1;
                     end
@@ -576,7 +576,7 @@ module control_unit (
                         SelectByteSrc = 2'b10;
                         SelectByte = 1'b0; ///
                         // Controller for reset
-                        rst_out = 1'b0;
+                        reset = 1'b0;
                         // Setting counter for next operation
                         COUNTER = COUNTER + 1;
                     end
@@ -610,7 +610,7 @@ module control_unit (
                         SelectByteSrc = 2'b10;
                         SelectByte = 1'b0; ///
                         // Controller for reset
-                        rst_out = 1'b0;
+                        reset = 1'b0;
                         // Setting counter for initial state
                         COUNTER = 5'd0;
                     end
@@ -647,7 +647,7 @@ module control_unit (
                         SelectByteSrc = 2'b10; ///
                         SelectByte = 1'b0; ///
                         // Controller for reset
-                        rst_out = 1'b1; /// Comentário indicando o que foi alterado
+                        reset = 1'b1; /// Comentário indicando o que foi alterado
                         // Setting counter for next operation
                         COUNTER = COUNTER + 1;
                     end
@@ -682,7 +682,7 @@ module control_unit (
                         SelectByteSrc = 2'b10; ///
                         SelectByte = 1'b0; ///
                         // Controller for reset
-                        rst_out = 1'b1; /// Comentário indicando o que foi alterado
+                        reset = 1'b1; /// Comentário indicando o que foi alterado
                         // Setting counter for next operation
                         COUNTER = 5'd0;
                     end
@@ -719,7 +719,7 @@ module control_unit (
                         SelectByteSrc = 2'b10; ///
                         SelectByte = 1'b0; ///
                         // Controller for reset
-                        rst_out = 1'b1; /// Comentário indicando o que foi alterado
+                        reset = 1'b1; /// Comentário indicando o que foi alterado
                         // Setting counter for next operation
                         COUNTER = COUNTER + 1;
                     end
@@ -754,7 +754,7 @@ module control_unit (
                         SelectByteSrc = 2'b10; ///
                         SelectByte = 1'b0; ///
                         // Controller for reset
-                        rst_out = 1'b1; /// Comentário indicando o que foi alterado
+                        reset = 1'b1; /// Comentário indicando o que foi alterado
                         // Setting counter for next operation
                         COUNTER = 5'd0;
                     end
@@ -791,7 +791,7 @@ module control_unit (
                         SelectByteSrc = 2'b0; ///
                         SelectByte = 1'b1; ///
                         // Controller for reset
-                        rst_out = 1'b0;
+                        reset = 1'b0;
                         // Setting counter for next operation
                         COUNTER = COUNTER + 1;
                     end
@@ -826,7 +826,7 @@ module control_unit (
                         SelectByteSrc = 2'b0; ///
                         SelectByte = 1'b1; ///
                         // Controller for reset
-                        rst_out = 1'b0;
+                        reset = 1'b0;
                         // Setting counter for next operation
                         COUNTER = COUNTER + 1;
                     end
@@ -861,7 +861,7 @@ module control_unit (
                         SelectByteSrc = 2'b0; ///
                         SelectByte = 1'b1; ///
                         // Controller for reset
-                        rst_out = 1'b0;
+                        reset = 1'b0;
                         // Setting counter for next operation
                         COUNTER = COUNTER + 1;
                     end
@@ -897,7 +897,7 @@ module control_unit (
                         SelectByteSrc = 2'b10; ///
                         SelectByte = 1'b0; ///
                         // Controller for reset
-                        rst_out = 1'b0;
+                        reset = 1'b0;
                         // Setting counter for next operation
                         COUNTER = 5'd0;
                     end

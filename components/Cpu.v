@@ -18,7 +18,7 @@ module cpu (
     // Saidas Controle
     wire ctrl_pcwritecondbeq;
     wire ctrl_pcwrite;
-    wire ctrl_pcwritecondbne;;
+    wire ctrl_pcwritecondbne;
     wire ctrl_iord;
     wire ctrl_contorexcep;
     wire ctrl_selectbytesrc;
@@ -149,7 +149,7 @@ module cpu (
     ShiftLeft16 shiftleft16(.di(sign_extend_out), .do(shiftleft16_out));
     ShiftLeft2bottom shiftleft2bottom(.di(sign_extend_out), .do(shiftleft2bottom_out));
     ShiftLeft2top shiftleft2top(.di1(rs), .di2(rt), .di3(immediate), .do(shiftleft2bottom_out));
-    DivMult divmult(.divmult_zeroexception); // ! completar apos fazer o modulo divmult
+   // DivMult divmult(.divmult_zeroexception); // ! completar apos fazer o modulo divmult
 
     control_unit control(
         // inputs
@@ -190,8 +190,8 @@ module cpu (
         .MemToReg(ctrl_memtoreg),
         .ShiftFuncSrc(ctrl_shiftfuncsrc),
         .SelectByteSrc(ctrl_selectbytesrc),
-        .SelectByte(ctrl_selectbyte),
-        .rst_out // ! completar aqui!
+        .SelectByte(ctrl_selectbyte)
+        //.rst_out // ! completar aqui!
     );
     
 endmodule
