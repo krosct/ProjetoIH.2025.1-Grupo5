@@ -154,9 +154,9 @@ module Cpu (
     control_unit control(
         // inputs
         .clk(clk),
-        .reset(reset),
+        .resett(reset),
         .OverflowException(alu_overflowexception),
-        .ng(), // ?
+        .ng(nouse), // ?
         .Zero(alu_zero),
         .ZeroException(divmult_zeroexception),
         .eq(nouse),

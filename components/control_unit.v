@@ -1,6 +1,6 @@
 module control_unit (
     input wire clk,
-    input wire reset,
+    input wire resett,
     // Flags ??
     input wire OverflowException, // Overflow
     input wire ng, // ?
@@ -41,12 +41,11 @@ module control_unit (
     output reg[2:0] MemToReg,
     output reg [1:0] ShiftFuncSrc,
     output reg [1:0] SelectByteSrc,
-    output reg SelectByte,
-    // Controller for reset
-    output reg reset
+    output reg SelectByte
 );
 
     // Variables
+    reg reset;
     reg [4:0] STATE;
     reg [4:0] COUNTER;
 
