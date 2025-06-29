@@ -41,7 +41,8 @@ module control_unit (
     output reg[2:0] MemToReg,
     output reg [1:0] ShiftFuncSrc,
     output reg [1:0] SelectByteSrc,
-    output reg SelectByte
+    output reg SelectByte,
+    output reg rst_out
 );
 
     // Variables
@@ -107,14 +108,15 @@ module control_unit (
     parameter J = 6'h0x2;
     parameter JAL = 6'h0x3;
     initial begin
-        reset = 1'b1;
+        rst_out = 1'b1;
     end
 
     always @(posedge clk) begin
         // TODO: Reset precisa ser revisado na nossa arquitetura
-        if (reset == 1'b1) begin
+        if (rst_out == 1'b1) begin
             if (STATE != ST_RESET) begin
                 STATE = ST_RESET;
+                rst_out = 1'b1;
                 // Settings all signals
                 PCWrite = 1'b0;
                 EPCWrite = 1'b0;
@@ -151,10 +153,11 @@ module control_unit (
             else begin
                 STATE = ST_READ_F_MEMORY;
                 // Settings all signals (All Os)
+                rst_out = 1'b0;
                 PCWrite = 1'b0;
                 EPCWrite = 1'b0;
                 ALUOp = 3'b0;   ///
-                MemRead = 1'b1;     ///
+                MemRead = 1'b0;     ///
                 MemWrite = 1'b0;
                 IRWrite = 1'b0;
                 RegWrite = 1'b0;
@@ -263,7 +266,7 @@ module control_unit (
                         PCWrite = 1'b0;    /// PC já escrito
                         EPCWrite = 1'b0;
                         ALUOp = 3'b001;   /// Soma
-                        MemRead = 1'b1;     ///
+                        MemRead = 1'b0;     ///
                         MemWrite = 1'b0;
                         IRWrite = 1'b0;    /// 
                         RegWrite = 1'b0;

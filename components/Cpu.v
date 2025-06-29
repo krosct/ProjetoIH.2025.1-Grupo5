@@ -8,10 +8,10 @@ module Cpu (
     wire [31:0] mux_contorexcep;
     wire [31:0] mux_selectbytesrc;
     wire [31:0] mux_pcsource;
-    wire [31:0] mux_shamtsource;
-    wire [31:0] mux_shiftfuncsrc;
+    wire [4:0] mux_shamtsource;
+    wire [2:0] mux_shiftfuncsrc;
     wire [31:0] mux_memtoreg;
-    wire [31:0] mux_regdst;
+    wire [4:0] mux_regdst;
     wire [31:0] mux_alusrca;
     wire [31:0] mux_alusrcb;
 
@@ -116,7 +116,7 @@ module Cpu (
     assign c_010 = 31'b010;
 
     // Saidas fakes
-    wire epc_out;
+    wire [31:0] epc_out;
     wire nouse;
     assign nouse = 31'b00;
 
@@ -128,11 +128,11 @@ module Cpu (
     Registrador regMDR2(.Clk(clk), .Reset(reset), .Load(ctrl_mdr2), .Entrada(memory_memdata_out), .Saida(mdr2_out));
     Registrador regLO(.Clk(clk), .Reset(reset), .Load(ctrl_lo), .Entrada(divmult_lo_out), .Saida(lo_out));
     Registrador regHI(.Clk(clk), .Reset(reset), .Load(ctrl_hi), .Entrada(divmult_hi_out), .Saida(hi_out));
-    Banco_reg bancoREG(.Clk(clk), .Reset(reset), .RegWrite(ctrl_regwrite), .ReadReg1(rs), .ReadReg2(rt), .WriteReg(mux_regdst), .WriteData(selectbyte_out), .ReadData1(Read_Data1_Out), .ReadData2(Read_Data2_Out));
-    Registrador regA(.Clk(clk), .Reset(reset), .Load(ctrl_controla), .Entrada(Read_Data1_Out), .Saida(a_out));
-    Registrador regB(.Clk(clk), .Reset(reset), .Load(ctrl_controlb), .Entrada(Read_Data2_Out), .Saida(b_out));
+    Banco_reg bancoREG(.Clk(clk), .Reset(reset), .RegWrite(ctrl_regwrite), .ReadReg1(rs), .ReadReg2(rt), .WriteReg(mux_regdst), .WriteData(selectbyte_out), .ReadData1(reg_readdata1_out), .ReadData2(reg_readdata2_out));
+    Registrador regA(.Clk(clk), .Reset(reset), .Load(ctrl_controla), .Entrada(reg_readdata1_out), .Saida(a_out));
+    Registrador regB(.Clk(clk), .Reset(reset), .Load(ctrl_controlb), .Entrada(reg_readdata2_out), .Saida(b_out));
     Registrador regALUOUT(.Clk(clk), .Reset(reset), .Load(ctrl_aluout), .Entrada(alu_result), .Saida(aluout_out));
-    RegDesloc regDESLOC(.Clk(clk), .Reset(reset), .Shift(mux_shiftfuncsrc), .N(mux_shamtsource), .Entrada(Read_Data2_Out), .Saida(reg_deslocamento_out));
+    RegDesloc regDESLOC(.Clk(clk), .Reset(reset), .Shift(mux_shiftfuncsrc), .N(mux_shamtsource), .Entrada(reg_readdata2_out), .Saida(reg_deslocamento_out));
     ula32 ALU(.A(mux_alusrca), .B(mux_alusrcb), .Seletor(alucontrol_out), .S(alu_result), .Overflow(alu_overflowexception), .Negativo(nouse), .z(alu_zero), .Igual(nouse), .Maior(nouse), .Menor(nouse));
     Mux_1bit contorexcep(.ctrl(ctrl_contorexcep), .o0(mux_pcsource), .o1(selectbyte_out), .out(mux_contorexcep));
     Mux_3bits iord(.ctrl(ctrl_iord), .o0(pc_out), .o1(aluout_out), .o2(c_253), .o3(c_254), .o4(c_255), .o5(nouse), .o6(nouse), .o7(nouse), .out(mux_iord));
@@ -149,7 +149,7 @@ module Cpu (
     ShiftLeft16 shiftleft16(.di(sign_extend_out), .do(shiftleft16_out));
     ShiftLeft2bottom shiftleft2bottom(.di(sign_extend_out), .do(shiftleft2bottom_out));
     ShiftLeft2top shiftleft2top(.di1(rs), .di2(rt), .di3(immediate), .do(shiftleft2bottom_out));
-   // DivMult divmult(.divmult_zeroexception); // ! completar apos fazer o modulo divmult
+    // DivMult divmult(.divmult_zeroexception); // ! completar apos fazer o modulo divmult
 
     control_unit control(
         // inputs
