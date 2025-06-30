@@ -24,13 +24,12 @@ module Cpu (
     wire ctrl_selectbytesrc;
     wire ctrl_pcsource;
     wire ctrl_shamtsource;
-    wire ctrl_shiftfuncsrc;
+    wire [1:0] ctrl_shiftfuncsrc;
     wire ctrl_memtoreg;
     wire ctrl_regdst;
     wire ctrl_alusrca;
     wire ctrl_alusrcb;
     wire ctrl_epcwrite;
-    wire ctrl_memread;
     wire ctrl_memwrite;
     wire ctrl_irwrite;
     wire ctrl_mdr1;
@@ -103,27 +102,28 @@ module Cpu (
     wire [31:0] c_4;
     wire [31:0] c_001;
     wire [31:0] c_010;
-    assign c_255 = 31'd255;
-    assign c_254 = 31'd254;
-    assign c_253 = 31'd253;
-    assign c_29 = 31'd29;
-    reg r31 = 31'b00;
-    assign c_r31 = r31;
-    assign c_227 = 31'd227;
-    assign c_0 = 31'd0;
-    assign c_4 = 31'd4;
-    assign c_001 = 31'b001;
-    assign c_010 = 31'b010;
+    assign c_255 = 32'd255;
+    assign c_254 = 32'd254;
+    assign c_253 = 32'd253;
+    assign c_29 = 32'd29;
+    reg [31:0] r31_reg;
+    initial r31_reg = 32'b0;
+    assign c_r31 = r31_reg;
+    assign c_227 = 32'd227;
+    assign c_0 = 32'd0;
+    assign c_4 = 32'd4;
+    assign c_001 = 32'b001;
+    assign c_010 = 32'b010;
 
     // Saidas fakes
-    wire [31:0] epc_out;
-    wire nouse;
-    assign nouse = 31'b00;
+    wire [31:0] nouse;
+    assign nouse = 32'b00;
 
     Registrador regPC(.Clk(clk), .Reset(reset), .Load(or_pcwrite), .Entrada(mux_contorexcep), .Saida(pc_out));
-    Registrador regEPC(.Clk(clk), .Reset(reset), .Load(ctrl_epcwrite), .Entrada(pc_out), .Saida(epc_out));
-    Memoria memoria(.Address(mux_iord), .Clock(clk), .Wr(ctrl_memread), .Datain(selectbyte_out), .Dataout(memory_memdata_out));
+    Registrador regEPC(.Clk(clk), .Reset(reset), .Load(ctrl_epcwrite), .Entrada(pc_out), .Saida(nouse31));
+    Memoria memoria(.Address(mux_iord), .Clock(clk), .Wr(ctrl_memwrite), .Datain(selectbyte_out), .Dataout(memory_memdata_out));
     Instr_Reg instrREG(.Clk(clk), .Reset(reset), .Load_ir(ctrl_irwrite), .Entrada(memory_memdata_out), .Instr31_26(opcode), .Instr25_21(rs), .Instr20_16(rt), .Instr15_0(immediate));
+    assign funct = memory_memdata_out[5:0];
     Registrador regMDR1(.Clk(clk), .Reset(reset), .Load(ctrl_mdr1), .Entrada(memory_memdata_out), .Saida(mdr1_out));
     Registrador regMDR2(.Clk(clk), .Reset(reset), .Load(ctrl_mdr2), .Entrada(memory_memdata_out), .Saida(mdr2_out));
     Registrador regLO(.Clk(clk), .Reset(reset), .Load(ctrl_lo), .Entrada(divmult_lo_out), .Saida(lo_out));
@@ -140,7 +140,7 @@ module Cpu (
     Mux_3bits memtoreg(.ctrl(ctrl_memtoreg), .o0(mdr1_out), .o1(mdr2_out), .o2(reg_deslocamento_out), .o3(lo_out), .o4(hi_out), .o5(c_227), .o6(aluout_out), .o7(nouse), .out(mux_memtoreg));
     Mux_2bits regdst(.ctrl(ctrl_regdst), .o0(rt), .o1(rd), .o2(c_29), .o3(c_r31), .out(mux_regdst));
     Mux_muxshamtsource shamtsource(.ctrl(ctrl_shamtsource), .o0(immediate), .o1(mux_memtoreg), .out(mux_shamtsource));
-    Mux_muxshiftfuncsrc shiftfuncsrc(.ctrl(ctrl_shiftfuncsrc), .o0(immediate), .o1(c_001), .o2(c_010), .o3(nouse), .out());
+    Mux_muxshiftfuncsrc shiftfuncsrc(.ctrl(ctrl_shiftfuncsrc), .o0(immediate), .o1(c_001), .o2(c_010), .out(mux_shiftfuncsrc));
     Mux_2bits alusrca(.ctrl(ctrl_alusrca), .o0(c_0), .o1(pc_out), .o2(a_out), .o3(nouse), .out(mux_alusrca));
     Mux_3bits alusrcb(.ctrl(ctrl_alusrcb), .o0(b_out), .o1(c_4), .o2(sign_extend_out), .o3(shiftleft16_out), .o4(shiftleft2bottom_out), .o5(nouse), .o6(nouse), .o7(nouse), .out(mux_alusrcb));
     Mux_muxpcsource pcsource(.ctrl(ctrl_pcsource), .o0(pc_out), .o1(aluout_out), .o2(pc_out), .o3(shiftleft2top_out), .out(mux_pcsource));
@@ -148,7 +148,8 @@ module Cpu (
     SignExtend signextend(.di(immediate), .do(sign_extend_out));
     ShiftLeft16 shiftleft16(.di(sign_extend_out), .do(shiftleft16_out));
     ShiftLeft2bottom shiftleft2bottom(.di(sign_extend_out), .do(shiftleft2bottom_out));
-    ShiftLeft2top shiftleft2top(.di1(rs), .di2(rt), .di3(immediate), .do(shiftleft2bottom_out));
+    ShiftLeft2top shiftleft2top(.di1(rs), .di2(rt), .di3(immediate), .do(shiftleft2top_out));
+    alu_control aluctrl(.ctrl(ctrl_aluop), .o0(funct), .out(alucontrol_out));
     // DivMult divmult(.divmult_zeroexception); // ! completar apos fazer o modulo divmult
 
     control_unit control(
@@ -168,7 +169,6 @@ module Cpu (
         .PCWrite(ctrl_pcwrite),
         .EPCWrite(ctrl_epcwrite),
         .ALUOp(ctrl_aluop),
-        .MemRead(ctrl_memread),
         .MemWrite(ctrl_memwrite),
         .IRWrite(ctrl_IRWrite),
         .RegWrite(ctrl_regwrite),
