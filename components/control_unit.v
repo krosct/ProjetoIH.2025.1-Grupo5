@@ -50,17 +50,14 @@ module control_unit (
     // Machine States
     parameter ST_READ_F_MEMORY = 5'd0;  // Estado inicial lê instrução da memória e soma PC = 4  INSTRUCTION FETCH
     parameter ST_INTRUCTION_DECODE = 5'd1;  // Lê da memoria e escreve em IR INSTRUCION DECODE LÊ DA MEMORIA E DECODIFICA
-    parameter ST_ADD = 5'd2;
-    parameter ST_AND = 5'd3;
+    parameter ST_ADD_SUB_AND = 5'd2;
     parameter ST_DIV = 5'd4;
     parameter ST_MULT = 5'd5;
     parameter ST_JR = 5'd6;
     parameter ST_MFHI = 5'd7;
     parameter ST_MFLO = 5'd8;
-    parameter ST_SLL = 5'd9;
+    parameter ST_SLL_SRA = 5'd9;
     parameter ST_SLT = 5'd10;
-    parameter ST_SRA = 5'd11;
-    parameter ST_SUB = 5'd12;
     parameter ST_XCHG = 5'd13;
     parameter ST_ADDI = 5'd14;
     parameter ST_BEQ = 5'd15;
@@ -171,10 +168,7 @@ module control_unit (
                             INST_R:
                                 case (funct)
                                     ADD: begin
-                                        STATE = ST_ADD;
-                                    end
-                                    AND: begin
-                                        STATE = ST_AND;
+                                        STATE = ST_ADD_SUB_AND;
                                     end
                                     DIV: begin
                                         STATE = ST_DIV;
@@ -192,16 +186,10 @@ module control_unit (
                                         STATE = ST_MFLO;
                                     end
                                     SLL: begin
-                                        STATE = ST_SLL;
+                                        STATE = ST_SLL_SRA;
                                     end
                                     SLT: begin
                                         STATE = ST_SLT;
-                                    end
-                                    SRA: begin
-                                        STATE = ST_SRA;
-                                    end
-                                    SUB: begin
-                                        STATE = ST_SUB;
                                     end
                                 endcase
                             ADDI: begin
@@ -239,14 +227,13 @@ module control_unit (
                             end
                             default: begin
                                 resett = 1'b1;
-                                STATE = ST_RESET;
+                                // STATE = ST_RESET;
                             end
                         endcase
                         COUNTER = COUNTER + 1;
                     end
 
-                ST_ADD: begin
-                    // Settings all signals
+                ST_ADD_SUB_AND: begin
                     if (COUNTER == 5'd4) begin
                         ALUOp = 2'b10;
                         ALUOut = 1'b1;
@@ -264,302 +251,333 @@ module control_unit (
                 end
 
                 ST_ADDI: begin
-                    // Settings all signals
                     if (COUNTER == 5'd4) begin
-                        ALUSrcA = 2'b10; ///
-                        ALUSrcB = 3'b010; ///
-                        ALUOut = 1'b1; ///
+                        ALUSrcA = 2'b10;
+                        ALUSrcB = 3'b010;
+                        ALUOut = 1'b1;
                         COUNTER = COUNTER + 1;
                     end
                     else if (COUNTER == 5'd5) begin
-                        // Settings all signals to 0
-                        RegWrite = 1'b1; ///
-                        MemToReg = 3'b110; ///
+                        RegWrite = 1'b1;
+                        MemToReg = 3'b110;
                         SelectByteSrc = 2'b10;
                         COUNTER = COUNTER + 1;
                         resett = 1'b1;
                     end
                 end
+
+                ST_DIV: begin
+                    if (COUNTER == 5'd4) begin
+                        DivMult = 0;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd38) begin
+                        Hi = 1;
+                        Lo = 1;
+                        COUNTER = COUNTER + 1;
+                        resett = 1'b1;
+                    end
+                    else
+                    begin
+                        COUNTER = COUNTER + 1;
+                    end
+                end
+
                 ST_MFLO: begin
-                    if (COUNTER == 5'd0) begin
-                        STATE = ST_MFLO;
-                        // Settings all signals
-                        PCWrite = 1'b0;
-                        EPCWrite = 1'b0;
-                        ALUOp = 2'b0;
-                        MemWrite = 1'b0;
-                        IRWrite = 1'b0;
+                    if (COUNTER == 5'd4) begin
+                        MemToReg = 3'b011;
+                        RegDst = 2'b01;
                         RegWrite = 1'b1;
-                        ControlA = 1'b0;
-                        ControlB = 1'b0;
-                        ALUOut = 1'b0;
-                        DivMult = 1'b0;
-                        Hi = 1'b0;
-                        Lo = 1'b0;
-                        PCWriteCondBEQ = 1'b0;
-                        PCWriteCondBNE = 1'b0;
-                        // Mux
-                        IorD = 3'b0;
-                        ContOrExcep = 1'b0;
-                        RegDst = 2'b0;
-                        ALUSrcA = 2'b0;
-                        ALUSrcB = 3'b0;
-                        PCSource = 2'b0;
-                        ShamtSource = 1'b0;
-                        MemToReg = 3'b011; ///
-                        ShiftFuncSrc = 2'b0;
-                        SelectByteSrc = 2'b10; ///
-                        SelectByte = 1'b0; ///
-                        // Controller for resett
-                        resett = 1'b1; /// Comentário indicando o que foi alterado
-                        // Setting counter for next operation
+                        SelectByteSrc = 2'b10;
+                        resett = 1'b1;
                         COUNTER = COUNTER + 1;
                     end
-                    else if (COUNTER == 5'd1) begin
-                        STATE = ST_READ_F_MEMORY;
-                        // Settings all signals
-                        PCWrite = 1'b0;
-                        EPCWrite = 1'b0;
-                        ALUOp = 2'b0;
-                        MemWrite = 1'b0;
-                        IRWrite = 1'b0;
-                        RegWrite = 1'b1;
-                        ControlA = 1'b0;
-                        ControlB = 1'b0;
-                        ALUOut = 1'b0;
-                        DivMult = 1'b0;
-                        Hi = 1'b0;
-                        Lo = 1'b0;
-                        PCWriteCondBEQ = 1'b0;
-                        PCWriteCondBNE = 1'b0;
-                        // Mux
-                        IorD = 3'b0;
-                        ContOrExcep = 1'b0;
-                        RegDst = 2'b0;
-                        ALUSrcA = 2'b0;
-                        ALUSrcB = 3'b0;
-                        PCSource = 2'b0;
-                        ShamtSource = 1'b0;
-                        MemToReg = 3'b011; ///
-                        ShiftFuncSrc = 2'b0;
-                        SelectByteSrc = 2'b10; ///
-                        SelectByte = 1'b0; ///
-                        // Controller for resett
-                        resett = 1'b1; /// Comentário indicando o que foi alterado
-                        // Setting counter for next operation
-                        COUNTER = 5'd0;
-                    end
                 end
+
                 ST_MFHI: begin
-                    if (COUNTER == 5'd0) begin
-                        STATE = ST_MFHI;
-                        // Settings all signals
-                        PCWrite = 1'b0;
-                        EPCWrite = 1'b0;
-                        ALUOp = 2'b0;
-                        MemWrite = 1'b0;
-                        IRWrite = 1'b0;
+                    if (COUNTER == 5'd4) begin
+                        MemToReg = 3'b100;
+                        SelectByteSrc = 2'b10;
+                        RegDst = 2'b01;
                         RegWrite = 1'b1;
-                        ControlA = 1'b0;
-                        ControlB = 1'b0;
-                        ALUOut = 1'b0;
-                        DivMult = 1'b0;
-                        Hi = 1'b0;
-                        Lo = 1'b0;
-                        PCWriteCondBEQ = 1'b0;
-                        PCWriteCondBNE = 1'b0;
-                        // Mux
-                        IorD = 3'b0;
-                        ContOrExcep = 1'b0;
-                        RegDst = 2'b0;
-                        ALUSrcA = 2'b0;
-                        ALUSrcB = 3'b0;
-                        PCSource = 2'b0;
-                        ShamtSource = 1'b0;
-                        MemToReg = 3'b011; ///
-                        ShiftFuncSrc = 2'b0;
-                        SelectByteSrc = 2'b10; ///
-                        SelectByte = 1'b0; ///
-                        // Controller for resett
-                        resett = 1'b1; /// Comentário indicando o que foi alterado
-                        // Setting counter for next operation
+                        resett = 1'b1;
                         COUNTER = COUNTER + 1;
-                    end
-                    else if (COUNTER == 5'd1) begin
-                        STATE = ST_READ_F_MEMORY;
-                        // Settings all signals
-                        PCWrite = 1'b0;
-                        EPCWrite = 1'b0;
-                        ALUOp = 2'b0;
-                        MemWrite = 1'b0;
-                        IRWrite = 1'b0;
-                        RegWrite = 1'b1;
-                        ControlA = 1'b0;
-                        ControlB = 1'b0;
-                        ALUOut = 1'b0;
-                        DivMult = 1'b0;
-                        Hi = 1'b0;
-                        Lo = 1'b0;
-                        PCWriteCondBEQ = 1'b0;
-                        PCWriteCondBNE = 1'b0;
-                        // Mux
-                        IorD = 3'b0;
-                        ContOrExcep = 1'b0;
-                        RegDst = 2'b0;
-                        ALUSrcA = 2'b0;
-                        ALUSrcB = 3'b0;
-                        PCSource = 2'b0;
-                        ShamtSource = 1'b0;
-                        MemToReg = 3'b011; ///
-                        ShiftFuncSrc = 2'b0;
-                        SelectByteSrc = 2'b10; ///
-                        SelectByte = 1'b0; ///
-                        // Controller for resett
-                        resett = 1'b1; /// Comentário indicando o que foi alterado
-                        // Setting counter for next operation
-                        COUNTER = 5'd0;
                     end
                 end
+
                 ST_LB: begin
-                    if (COUNTER == 5'd0) begin
-                        STATE = ST_LB;
-                        // Settings all signals
-                        PCWrite = 1'b0;
-                        EPCWrite = 1'b0;
-                        ALUOp = 2'b0;
-                        MemWrite = 1'b0;
-                        IRWrite = 1'b0;
-                        RegWrite = 1'b0;
-                        ControlA = 1'b0;
-                        ControlB = 1'b0;
-                        ALUOut = 1'b1; ///
-                        DivMult = 1'b0;
-                        Hi = 1'b0;
-                        Lo = 1'b0;
-                        PCWriteCondBEQ = 1'b0;
-                        PCWriteCondBNE = 1'b0;
-                        // Mux
-                        IorD = 3'b0;
-                        ContOrExcep = 1'b0;
-                        RegDst = 2'b0;
-                        ALUSrcA = 2'b10; ///
-                        ALUSrcB = 3'b010; ///
-                        PCSource = 2'b0;
-                        ShamtSource = 1'b0;
-                        MemToReg = 3'b0;
-                        ShiftFuncSrc = 2'b0;
-                        SelectByteSrc = 2'b0; ///
-                        SelectByte = 1'b1; ///
-                        // Controller for resett
-                        resett = 1'b0;
-                        // Setting counter for next operation
-                        COUNTER = COUNTER + 1;
-                    end
-                    else if (COUNTER == 5'd1) begin
-                        STATE = ST_LB;
-                        // Settings all signals
-                        PCWrite = 1'b0;
-                        EPCWrite = 1'b0;
-                        ALUOp = 2'b0;
-                        MemWrite = 1'b0;
-                        IRWrite = 1'b0;
-                        RegWrite = 1'b0;
-                        ControlA = 1'b0;
-                        ControlB = 1'b0;
-                        ALUOut = 1'b0; ///
-                        DivMult = 1'b0;
-                        Hi = 1'b0;
-                        Lo = 1'b0;
-                        PCWriteCondBEQ = 1'b0;
-                        PCWriteCondBNE = 1'b0;
-                        // Mux
-                        IorD = 3'b001; ///
-                        ContOrExcep = 1'b0;
-                        RegDst = 2'b0;
-                        ALUSrcA = 2'b10; ///
-                        ALUSrcB = 3'b010; ///
-                        PCSource = 2'b0;
-                        ShamtSource = 1'b0;
-                        MemToReg = 3'b0;
-                        ShiftFuncSrc = 2'b0;
-                        SelectByteSrc = 2'b0; ///
-                        SelectByte = 1'b1; ///
-                        // Controller for resett
-                        resett = 1'b0;
-                        // Setting counter for next operation
-                        COUNTER = COUNTER + 1;
-                    end
-                    else if (COUNTER == 5'd2) begin
-                        STATE = ST_LB;
-                        // Settings all signals
-                        PCWrite = 1'b0;
-                        EPCWrite = 1'b0;
-                        ALUOp = 2'b0;
-                        MemWrite = 1'b0;
-                        IRWrite = 1'b0;
-                        RegWrite = 1'b0;
-                        ControlA = 1'b0;
-                        ControlB = 1'b0;
-                        ALUOut = 1'b0; ///
-                        DivMult = 1'b0;
-                        Hi = 1'b0;
-                        Lo = 1'b0;
-                        PCWriteCondBEQ = 1'b0;
-                        PCWriteCondBNE = 1'b0;
-                        // Mux
-                        IorD = 3'b001; ///
-                        ContOrExcep = 1'b0;
-                        RegDst = 2'b0;
-                        ALUSrcA = 2'b10; ///
-                        ALUSrcB = 3'b010; ///
-                        PCSource = 2'b0;
-                        ShamtSource = 1'b0;
-                        MemToReg = 3'b0;
-                        ShiftFuncSrc = 2'b0;
-                        SelectByteSrc = 2'b0; ///
-                        SelectByte = 1'b1; ///
-                        // Controller for resett
-                        resett = 1'b0;
-                        // Setting counter for next operation
-                        COUNTER = COUNTER + 1;
-                    end
-                    else if (COUNTER == 5'd3) begin
-                        STATE = ST_LB;
-                        // Settings all signals
-                        PCWrite = 1'b0;
-                        EPCWrite = 1'b0;
-                        ALUOp = 2'b0;
-                        MemWrite = 1'b0;
-                        IRWrite = 1'b0;
-                        RegWrite = 1'b1;
-                        ControlA = 1'b0;
-                        ControlB = 1'b0;
-                        ALUOut = 1'b0;
-                        DivMult = 1'b0;
-                        Hi = 1'b0;
-                        Lo = 1'b0;
-                        PCWriteCondBEQ = 1'b0;
-                        PCWriteCondBNE = 1'b0;
-                        MDR1 = 1'b1; ///
-                        // Mux
-                        IorD = 3'b001;
-                        ContOrExcep = 1'b0;
-                        RegDst = 2'b0;
+                    if (COUNTER == 5'd4) begin
                         ALUSrcA = 2'b10;
                         ALUSrcB = 3'b010;
-                        PCSource = 2'b0;
-                        ShamtSource = 1'b0;
-                        MemToReg = 3'b0; ///
-                        ShiftFuncSrc = 2'b0;
-                        SelectByteSrc = 2'b10; ///
-                        SelectByte = 1'b0; ///
-                        // Controller for resett
-                        resett = 1'b0;
-                        // Setting counter for next operation
-                        COUNTER = 5'd0;
+                        ALUOut = 1'b1;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd5) begin
+                        IorD = 3'b001;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd8) begin
+                        MDR1 = 1'b1;
+                        SelectByteSrc = 2'10;
+                        SelectByte = 1'b1;
+                        RegWrite = 1'b1;
+                        COUNTER = COUNTER + 1;
+                        resett = 1'b1;
+                    end
+                    begin
+                        COUNTER = COUNTER + 1;
+                    end
+                end
+
+                ST_LW: begin
+                    if (COUNTER == 5'd4) begin
+                        ALUSrcA = 2'b10;
+                        ALUSrcB = 3'b010;
+                        ALUOut = 1'b1;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd5) begin
+                        IorD = 3'b001;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd8) begin
+                        MDR1 = 1'b1;
+                        SelectByteSrc = 2'10;
+                        RegWrite = 1'b1;
+                        COUNTER = COUNTER + 1;
+                        resett = 1'b1;
+                    end
+                    else
+                    begin
+                        COUNTER = COUNTER + 1;
+                    end
+                end
+
+                ST_LUI: begin
+                    if (COUNTER == 5'd4) begin
+                        ALUSrcB = 3'b011;
+                        ALUOut = 1'b1;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd5) begin
+                        MemToReg = 3'b110;
+                        SelectByteSrc = 2'b10;
+                        RegWrite = 1'b1;
+                        COUNTER = COUNTER + 1;
+                        resett = 1'b1;
+                    end
+                end
+
+                ST_SB: begin
+                    if (COUNTER == 5'd4) begin
+                        ALUSrcA = 2'b10;
+                        ALUSrcB = 3'b010;
+                        SelectByte = 1'b1;
+                        ALUOut = 1'b1;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd5) begin
+                        IorD = 3'b001;
+                        MemWrite = 1'b1;
+                        COUNTER = COUNTER + 1;
+                        resett = 1'b1;
+                    end
+                end
+
+                ST_SW: begin
+                    if (COUNTER == 5'd4) begin
+                        ALUSrcA = 2'b10;
+                        ALUSrcB = 3'b010;
+                        SelectByteSrc = 2'b01;
+                        ALUOut = 1'b1;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd5) begin
+                        IorD = 3'b001;
+                        MemWrite = 1'b1;
+                        COUNTER = COUNTER + 1;
+                        resett = 1'b1;
+                    end
+                end
+
+                ST_JR: begin
+                    if (COUNTER == 5'd4) begin
+                        ALUSrcA = 2'b10;
+                        ALUSrcB = 3'b010;
+                        ALUOp = 2'b10;
+                        ALUOut = 1'b1;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd5) begin
+                        PCSource = 2'b10;
+                        PCWrite = 1'b1;
+                        COUNTER = COUNTER + 1;
+                        resett = 1'b1;
+                    end
+                end
+
+                ST_J: begin
+                    if (COUNTER == 5'd4) begin
+                        PCSource = 2'b10;
+                        PCWrite = 1'b1;
+                        COUNTER = COUNTER + 1;
+                        resett = 1'b1;
+                    end
+                end
+
+                ST_JAL: begin
+                    if (COUNTER == 5'd4) begin
+                        RegDst = 2'b11;
+                        RegWrite = 1'b1;
+                        PCSource = 2'b10;
+                        PCWrite = 1'b1;
+                        COUNTER = COUNTER + 1;
+                        resett = 1'b1;
+                    end
+                end
+
+                ST_SLL_SRA: begin
+                    if (COUNTER == 5'd4) begin
+                        ShiftFuncSrc = 2'b01;
+                        RegDst = 2'01;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd6) begin
+                        MemToReg = 3'b010;
+                        SelectByteSrc = 2'b10;
+                        RegWrite = 1'b1;
+                        COUNTER = COUNTER + 1;
+                        resett = 1'b1;
+                    end
+                    else
+                    begin
+                        COUNTER = COUNTER + 1;
+                    end
+                end
+
+                ST_BEQ: begin
+                    if (COUNTER == 5'd4) begin
+                        PCSource = 2'b01;
+                        ALUSrcA = 2'b10;
+                        ALUOp = 2'b01;
+                        PCWriteCondBEQ = 1'b1;
+                        PCWrite = 1'b1;
+                        COUNTER = COUNTER + 1;
+                        resett = 1'b1;
+                    end
+                end
+
+                ST_BNE: begin
+                    if (COUNTER == 5'd4) begin
+                        PCSource = 2'b01;
+                        ALUSrcA = 2'b10;
+                        ALUOp = 2'b01;
+                        PCWriteCondBNE = 1'b1;
+                        PCWrite = 1'b1;
+                        COUNTER = COUNTER + 1;
+                        resett = 1'b1;
+                    end
+                end
+
+                ST_SLT: begin
+                    if (COUNTER == 5'd4) begin
+                        RegDst = 2'b01;
+                        ALUSrcA = 2'b10;
+                        ALUOp = 2'b10;
+                        ALUOut = 1'b1;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd5) begin
+                        MemToReg = 3'b110;
+                        SelectByteSrc = 2'b10;
+                        RegWrite = 1'b1;
+                        COUNTER = COUNTER + 1;
+                        resett = 1'b1;
+                    end
+                end
+
+                ST_SLLM: begin
+                    if (COUNTER == 5'd4) begin
+                        ShiftFuncSrc = 2'b01;
+                        ALUSrcA = 2'b10;
+                        ALUSrcB = 3'b010;
+                        ALUOut = 1'b1;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd5) begin
+                        IorD = 3'b001;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd6) begin
+                        MDR1 = 1'b1;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd7) begin
+                        ShamtSource = 1'b1;
+                        ShiftFuncSrc = 1'b1;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd8) begin
+                        ShamtSource = 1'b1;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd9) begin
+                        MemToReg = 3'b010;
+                        SelectByteSrc = 2'10;
+                        RegWrite = 1'b1;
+                        COUNTER = COUNTER + 1;
+                        resett = 1'b1;
                     end
                 end
                 
+                ST_XCHG: begin
+                    if (COUNTER == 5'd4) begin
+                        ALUSrcA = 2'b10;
+                        ALUOp = 2'b10;
+                        ALUOut = 1'b1;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd5) begin
+                        IorD = 3'b001;
+                        MDR1 = 1'b1;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd8) begin
+                        SelectByteSrc = 2'b10;
+                        ALUOut = 1'b1;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd9) begin
+                        IorD = 3'b001;
+                        MDR2 = 1'b1;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd12) begin
+                        ALUSrcA = 2'b01;
+                        ALUOp = 2'b10;
+                        ALUOut = 1'b1;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd13) begin
+                        IorD = 3'b001;
+                        MemWrite = 1'b1;
+                        ALUOut = 1'b1;
+                        COUNTER = COUNTER + 1;
+                    end
+                    else if (COUNTER == 5'd14) begin
+                        IorD = 3'b001;
+                        MemToReg = 3'b001;
+                        SelectByteSrc = 2'b10;
+                        MemWrite = 1'b1;
+                        COUNTER = COUNTER + 1;
+                        resett = 1'b1;
+                    end
+                    else
+                    begin
+                        COUNTER = COUNTER + 1;
+                    end
+                end
+
             endcase
         end
     end
